@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student CRUD App</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mt-5">
+    <h2 class="mb-4">Add Student</h2>
+    <form id="studentForm" enctype="multipart/form-data">
+      <input class="form-control mb-2" name="StudentName" placeholder="Name" required>
+      <input class="form-control mb-2" name="Mobile" placeholder="Mobile" required>
+      <input class="form-control mb-2" name="City" placeholder="City" required>
+      <input class="form-control mb-2" type="file" name="Image" accept="image/*" required>
+      <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+
+    <hr class="my-5">
+
+    <h3>Student List</h3>
+    <div id="studentList" class="row row-cols-1 row-cols-md-2 g-4 mt-3"></div>
+  </div>
+
+  <script>
+    const token = 'Bearer mysecrettoken';
+
+    document.getElementById('studentForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+
+      const res = await fetch('/api/students', {
+        method: 'POST',
+        headers: { 'Authorization': token },
+        body: formData
+      });
+
+      if (res.ok) {
+        alert('Student added!');
+        this.reset();
+        loadStudents();
+      } else {
+        alert('Error adding student.');
+      }
+    };
+
+    async function loadStudents() {
+      const res = await fetch('/api/students', {
+        headers: { 'Authorization': token }
+      });
+      const students = await res.json();
+      const list = document.getElementById('studentList');
+      list.innerHTML = students.map(s => `
+        <div class="col">
+          <div class="card h-100">
+            <img src="${s.Image}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="student-image">
+            <div class="card-body">
+              <h5 class="card-title">${s.StudentName}</h5>
+              <p class="card-text">${s.Mobile} - ${s.City}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    loadStudents();
+  </script>
+</body>
+</html>
